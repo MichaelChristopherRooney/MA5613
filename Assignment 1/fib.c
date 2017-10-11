@@ -4,6 +4,7 @@
 #include <time.h>
 
 // A deliberately slow implementation
+// Time taken grows exponentially as k increases
 int fib(int k){
 	if(k == 1 || k == 2){
 		return 1;
@@ -12,6 +13,7 @@ int fib(int k){
 }
 
 // A much faster implementation
+// Time taken grows lineraly as k increases
 int fib2(int k){
 	if(k == 1 || k == 2){
 		return 1;
@@ -28,6 +30,7 @@ int fib2(int k){
 	return f;
 }
 
+// Just calls fib with some timing code around it
 void run_fib(int k){
 	struct timeval start_time; 
 	struct timeval end_time;
@@ -40,6 +43,7 @@ void run_fib(int k){
 	printf("Slow version took %lld microseconds and calculated Fibonacci number %d as %d\n", time_taken, k, result);
 }
 
+// Just calls fib2 with some timing code around it
 void run_fib2(int k){
 	struct timeval start_time; 
 	struct timeval end_time;
@@ -52,7 +56,7 @@ void run_fib2(int k){
 	printf("Fast version took %lld microseconds and calculated Fibonacci number %d as %d\n", time_taken, k, result);
 }
 
-// Calculates the time taken to find fibonacci numbers 1 to n inclusive.
+// For fibonacci numbers 1 to n inclusive this calculates the time taken for each.
 // Each number is calculated 10 times and the time taken is averaged.
 // The results are written to a .csv file so they can be graphed
 void time_fib(n){
@@ -90,8 +94,7 @@ int main(int argc, char *argv[]){
 		printf("Please pass a valid non-zero integer\n");
 		return 1;
 	}
-	time_fib(k);
-	// run_fib(k);
-	// run_fib2(k);
+	run_fib(k);
+	run_fib2(k);
 }
 
