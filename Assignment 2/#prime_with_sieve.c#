@@ -40,7 +40,11 @@ int main(void){
 	int i;
 	for(i = 0; i < LIMIT; i++){
 		if(is_prime(i) == 1){
+<<<<<<< HEAD
+			printf("%d\n", i);
+=======
 			printf("%d is prime\n", i);
+>>>>>>> 6026035f2315754f3244729633f10ae881cabe80
 		}
 	}
 	return 0;
