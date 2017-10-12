@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 
 // A deliberately slow implementation
 // Time taken grows exponentially as k increases
@@ -54,34 +54,6 @@ void run_fib2(int k){
 	gettimeofday(&end_time, NULL);
 	time_taken = (end_time.tv_sec - start_time.tv_sec) * 1000000L + (end_time.tv_usec - start_time.tv_usec);
 	printf("Fast version took %lld microseconds and calculated Fibonacci number %d as %d\n", time_taken, k, result);
-}
-
-// For fibonacci numbers 1 to n inclusive this calculates the time taken for each.
-// Each number is calculated 10 times and the time taken is averaged.
-// The results are written to a .csv file so they can be graphed
-void time_fib(n){
-	// To "warm" the cache first
-	fib(10);
-	struct timeval start_time; 
-	struct timeval end_time;
-	long long time_taken;
-	const int num_runs = 10;
-	FILE *fp = fopen("results.csv", "w");
-	int i;
-	for(i = 1; i <= n; i++){
-		time_taken = 0;
-		int j;
-		for(j = 0; j < num_runs; j++){
-			gettimeofday(&start_time, NULL);
-			int result = fib(i);
-			gettimeofday(&end_time, NULL);
-			time_taken += (end_time.tv_sec - start_time.tv_sec) * 1000000L + (end_time.tv_usec - start_time.tv_usec);
-		}
-		time_taken = time_taken / num_runs;
-		fprintf(fp, "%lld,", time_taken);
-		printf("%d took %lld microseconds\n", i, time_taken);
-	}
-	fclose(fp);
 }
 
 int main(int argc, char *argv[]){
