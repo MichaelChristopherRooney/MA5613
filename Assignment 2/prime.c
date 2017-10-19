@@ -19,7 +19,7 @@ int main(void){
 	int i;
 	for(i = 0; i < 1000; i++){
 		if(is_prime(i) == 1){
-			printf("%d\n", i);
+			printf("%d is prime\n", i);
 		}
 	}
 	return 0;

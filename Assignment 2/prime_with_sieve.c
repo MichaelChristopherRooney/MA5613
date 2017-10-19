@@ -30,9 +30,7 @@ void init_prime_array(){
 }
 
 int is_prime(int x){
-	if(primes[x] == true){
-		return 1;
-	} 
+	return primes[x];
 }
 
 int main(void){
