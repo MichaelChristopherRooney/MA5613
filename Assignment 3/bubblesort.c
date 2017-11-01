@@ -2,18 +2,19 @@
 #include <string.h>
 
 void bubblesort(char string[]){
-	int no_swaps = 0;
+	int in_order = 0;
 	int str_len = strlen(string);
-	while(no_swaps == 0){
-		no_swaps = 1;
+	while(in_order == 0){
+		in_order = 1;
 		int i;
 		for(i = 0; i < str_len - 1; i++){
 			if(string[i] > string[i + 1]){
-				printf("Swapping %c and %c\n", string[i], string[i + 1]);
-				char temp = string[i];
-				string[i] = string[i + 1];
-				string[i + 1] = temp;
-				no_swaps = 0;
+				//printf("Swapping %c and %c\n", string[i], string[i + 1]);
+				// Swap using XOR - avoids needing temp variable (https://en.wikipedia.org/wiki/XOR_swap_algorithm)
+				string[i] ^= string[i + 1];
+				string[i + 1] ^= string[i];
+				string[i] ^= string[i + 1];
+				in_order = 0;
 			}
 		}
 	}
@@ -21,7 +22,9 @@ void bubblesort(char string[]){
 
 int main(void){
 	char s[] = "the quick brown fox jumps over the lazy dog";
+	printf("Unsorted string:\n%s\n", s);
 	//char s[] = "cba";
 	bubblesort(s);
-	printf("%s\n", s);
+	printf("Sorted string:\n%s\nNote that spaces are included as part of the sort.\n", s);
 }
+
