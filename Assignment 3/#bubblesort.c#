@@ -9,8 +9,9 @@ void bubblesort(char string[]){
 		int i;
 		for(i = 0; i < str_len - 1; i++){
 			if(string[i] > string[i + 1]){
+				//printf("Swapping %c and %c\n", string[i], string[i + 1]);
 				// Swap using XOR - avoids needing temp variable 
-				// See https://en.wikipedia.org/wiki/XOR_swap_algorithm
+			  (https://en.wikipedia.org/wiki/XOR_swap_algorithm)
 				string[i] ^= string[i + 1];
 				string[i + 1] ^= string[i];
 				string[i] ^= string[i + 1];
@@ -23,6 +24,7 @@ void bubblesort(char string[]){
 int main(void){
 	char s[] = "the quick brown fox jumps over the lazy dog";
 	printf("Unsorted string:\n%s\n", s);
+	//char s[] = "cba";
 	bubblesort(s);
 	printf("Sorted string:\n%s\nNote that spaces are included as part of the sort.\n", s);
 }
