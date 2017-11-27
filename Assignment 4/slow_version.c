@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define GRID_SIZE 6
+#include <sys/time.h>
+
+#define GRID_SIZE 40
 #define NUM_ITERATIONS 100
 
 int old_grid[GRID_SIZE][GRID_SIZE];
@@ -36,10 +38,9 @@ int is_cell_alive(int x, int y) {
 // Points to search around a given cell.
 // These are to be used with the same index.
 // Example: index 1 should give (x + 0, x + (-1)), to check above the current cell.
-int x_mod[8] = { -1, 0, 1, -1, 0, 1, -1, 1 };
-int y_mod[8] = { -1, -1, -1, 1, 1, 1, 0, 0 };
+static const int x_mod[8] = { -1, 0, 1, -1, 0, 1, -1, 1 };
+static const int y_mod[8] = { -1, -1, -1, 1, 1, 1, 0, 0 };
 
-// TODO: bail out if count > 3 ?
 int determine_cell_next_state(int x, int y, int currently_alive) {
 	int count = 0;
 	for (int i = 0; i < 8; i++) {
@@ -53,12 +54,10 @@ int determine_cell_next_state(int x, int y, int currently_alive) {
 }
 
 void run_tick() {
-	// TODO: faster way of doing this
-	memcpy(old_grid, cur_grid, sizeof(int) * GRID_SIZE * GRID_SIZE);
-	memset(cur_grid, 0, sizeof(int) * GRID_SIZE * GRID_SIZE);
+	memcpy(old_grid, cur_grid, sizeof(int) * GRID_SIZE * GRID_SIZE);	
 	int x, y;
 	for (x = 0; x < GRID_SIZE; x++) {
-		for (y = 0; y < GRID_SIZE; y++) {
+		for (y = 0; y < GRID_SIZE; y = y + 1) {
 			cur_grid[x][y] = determine_cell_next_state(x, y, old_grid[x][y]);
 		}
 	}
@@ -75,16 +74,23 @@ void init_grid() {
 
 int main() {
 	init_grid();
-	printf("Starting grid is:\n");
-	print_grid();
+	//printf("Starting grid is:\n");
+	//print_grid();
+	struct timeval start_time;
+	struct timeval end_time;
+	long long time_taken;
+	gettimeofday(&start_time, NULL);
 	int i;
 	for (i = 0; i < NUM_ITERATIONS; i++) {
-		printf("Grid %d\n", i + 1);
+		//printf("Grid %d\n", i + 1);
 		run_tick();
-		print_grid();
-		printf("Press enter to continue...\n");
-		getchar();
+		//print_grid();
+		//printf("Press enter to continue...\n");
+		//getchar();
 	}
+	gettimeofday(&end_time, NULL);
+	time_taken = (end_time.tv_sec - start_time.tv_sec) * 1000000L + (end_time.tv_usec - start_time.tv_usec);
 	print_grid();
+	printf("Time taken: %lld microseconds.\n", time_taken);
 	return 0;
 }
