@@ -1,27 +1,54 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #include <sys/time.h>
 
 #define GRID_SIZE 40
 #define NUM_ITERATIONS 100
 
-int old_grid[GRID_SIZE][GRID_SIZE];
-int cur_grid[GRID_SIZE][GRID_SIZE];
+#define BLACK "\x1B[30m"
+#define WHITE "\x1B[37m"
+#define RESET "\x1B[0m"
 
-void print_grid() {
+#define SLEEP_BETWEEN_PRINTS 0
+#define PRINT_RESULTS 1
+#define RECORD_TIME 0
+
+static int old_grid[GRID_SIZE][GRID_SIZE];
+static int cur_grid[GRID_SIZE][GRID_SIZE];
+
+static void clear_old_grid(){
+#if PRINT_RESULTS
+	int i;
+	for(i = 0; i < GRID_SIZE; i++){
+		fputs("\033[A\033[2K",stdout);
+	}
+	rewind(stdout);
+	ftruncate(1,0);
+#endif
+}
+
+static void print_grid() {
+#if PRINT_RESULTS
 	int x, y;
 	for (x = 0; x < GRID_SIZE; x++) {
-		for (y = 0; y < GRID_SIZE - 1; y++) { // < GRID_SIZE - 1 to handle printing the last number without the "|"
-			printf("%d | ", cur_grid[x][y]);
+		for (y = 0; y < GRID_SIZE; y++) {
+			if(cur_grid[x][y] == 1){
+				printf(WHITE "\u25A0" RESET);
+			} else {
+				printf(BLACK "\u25A0" RESET);
+			}
 		}
-		printf("%d\n", cur_grid[x][y]);
+		printf("\n");
 	}
+#endif
 }
 
 // Note: uses the old grid
-int is_cell_alive(int x, int y) {
+static int is_cell_alive(int x, int y) {
 	if (x == -1) {
 		x = GRID_SIZE - 1;
 	} else if (x == GRID_SIZE) {
@@ -41,7 +68,7 @@ int is_cell_alive(int x, int y) {
 static const int x_mod[8] = { -1, 0, 1, -1, 0, 1, -1, 1 };
 static const int y_mod[8] = { -1, -1, -1, 1, 1, 1, 0, 0 };
 
-int determine_cell_next_state(int x, int y, int currently_alive) {
+static int determine_cell_next_state(int x, int y, int currently_alive) {
 	int count = 0;
 	for (int i = 0; i < 8; i++) {
 		count += is_cell_alive(x + x_mod[i], y + y_mod[i]);
@@ -53,7 +80,8 @@ int determine_cell_next_state(int x, int y, int currently_alive) {
 	}
 }
 
-void run_tick() {
+static void run_tick() {
+	// Naive approach - copy memory instead of using a pointer to swap the grids.
 	memcpy(old_grid, cur_grid, sizeof(int) * GRID_SIZE * GRID_SIZE);	
 	int x, y;
 	for (x = 0; x < GRID_SIZE; x++) {
@@ -61,9 +89,14 @@ void run_tick() {
 			cur_grid[x][y] = determine_cell_next_state(x, y, old_grid[x][y]);
 		}
 	}
+	clear_old_grid();
+	print_grid();
+#if SLEEP_BETWEEN_PRINTS
+	sleep(1);
+#endif
 }
 
-void init_grid() {
+static void init_grid() {
 	int x, y;
 	for (x = 0; x < GRID_SIZE; x++) {
 		for (y = 0; y < GRID_SIZE; y++) {
@@ -74,23 +107,21 @@ void init_grid() {
 
 int main() {
 	init_grid();
-	//printf("Starting grid is:\n");
-	//print_grid();
+	print_grid();
+#if RECORD_TIME
 	struct timeval start_time;
 	struct timeval end_time;
 	long long time_taken;
 	gettimeofday(&start_time, NULL);
+#endif
 	int i;
 	for (i = 0; i < NUM_ITERATIONS; i++) {
-		//printf("Grid %d\n", i + 1);
 		run_tick();
-		//print_grid();
-		//printf("Press enter to continue...\n");
-		//getchar();
 	}
+#if RECORD_TIME
 	gettimeofday(&end_time, NULL);
 	time_taken = (end_time.tv_sec - start_time.tv_sec) * 1000000L + (end_time.tv_usec - start_time.tv_usec);
-	print_grid();
 	printf("Time taken: %lld microseconds.\n", time_taken);
+#endif
 	return 0;
 }

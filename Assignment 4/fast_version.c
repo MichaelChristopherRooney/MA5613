@@ -1,33 +1,62 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #include <sys/time.h>
+#include <omp.h>
 
 #define GRID_SIZE 40
 #define NUM_ITERATIONS 100
 
-// TODO: better names for globals
-int grid_1[GRID_SIZE][GRID_SIZE];
-int grid_2[GRID_SIZE][GRID_SIZE];
+#define BLACK "\x1B[30m"
+#define WHITE "\x1B[37m"
+#define RESET "\x1B[0m"
 
-int (*old_grid)[GRID_SIZE] = grid_1;
-int (*cur_grid)[GRID_SIZE] = grid_2;
+#define SLEEP_BETWEEN_PRINTS 1
+#define PRINT_RESULTS 1
+#define RECORD_TIME 0
+
+#define NUM_THREADS 4
+
+static int grid_1[GRID_SIZE][GRID_SIZE];
+static int grid_2[GRID_SIZE][GRID_SIZE];
+
+static int (*old_grid)[GRID_SIZE] = grid_1;
+static int (*cur_grid)[GRID_SIZE] = grid_2;
 // Used for swapping grids
-int (*temp)[GRID_SIZE];
+static int (*temp)[GRID_SIZE];
 
-void print_grid() {
+static void clear_old_grid(){
+#if PRINT_RESULTS
+	int i;
+	for(i = 0; i < GRID_SIZE; i++){
+		fputs("\033[A\033[2K",stdout);
+	}
+	rewind(stdout);
+	ftruncate(1,0);
+#endif
+}
+
+static void print_grid() {
+#if PRINT_RESULTS
 	int x, y;
 	for (x = 0; x < GRID_SIZE; x++) {
-		for (y = 0; y < GRID_SIZE - 1; y++) { // "< GRID_SIZE - 1" to handle printing the last number without the "|"
-			printf("%d | ", cur_grid[x][y]);
+		for (y = 0; y < GRID_SIZE; y++) {
+			if(cur_grid[x][y] == 1){
+				printf(WHITE "\u25A0" RESET);
+			} else {
+				printf(BLACK "\u25A0" RESET);
+			}
 		}
-		printf("%d\n", cur_grid[x][y]);
+		printf("\n");
 	}
+#endif
 }
 
 // Note: uses the old grid
-int is_cell_alive(int x, int y) {
+static int is_cell_alive(int x, int y) {
 	if (x == -1) {
 		x = GRID_SIZE - 1;
 	} else if (x == GRID_SIZE) {
@@ -41,8 +70,9 @@ int is_cell_alive(int x, int y) {
 	return old_grid[x][y];
 }
 
-int determine_cell_next_state(int x, int y, int currently_alive) {
+static int determine_cell_next_state(int x, int y, int currently_alive) {
 	int count = 0;
+	// Unrolled compared to the naive approach.
 	count += is_cell_alive(x - 1, y - 1);
 	count += is_cell_alive(x, y - 1);
 	count += is_cell_alive(x + 1, y - 1);
@@ -58,16 +88,21 @@ int determine_cell_next_state(int x, int y, int currently_alive) {
 	}
 }
 
-void swap_grids(){
+// Uses pointers to swap the grids.
+static void swap_grids(){
 	temp = cur_grid;
 	cur_grid = old_grid;
 	old_grid = temp;
 }
 
-void run_tick() {
+static void run_tick() {
 	swap_grids();	
 	int x;
+	omp_set_num_threads(NUM_THREADS);
+	#pragma omp parallel for
 	for (x = 0; x < GRID_SIZE; x++) {
+			// unrolled loop entirely
+			// ugly, but fast
 			cur_grid[x][0] = determine_cell_next_state(x, 0, old_grid[x][0]);
 			cur_grid[x][1] = determine_cell_next_state(x, 1, old_grid[x][1]);
 			cur_grid[x][2] = determine_cell_next_state(x, 2, old_grid[x][2]);
@@ -109,9 +144,14 @@ void run_tick() {
 			cur_grid[x][38] = determine_cell_next_state(x, 38, old_grid[x][38]);
 			cur_grid[x][39] = determine_cell_next_state(x, 39, old_grid[x][39]);
 	}
+	clear_old_grid();
+	print_grid();
+#if SLEEP_BETWEEN_PRINTS
+	sleep(1);
+#endif
 }
 
-void init_grid() {
+static void init_grid() {
 	int x, y;
 	for (x = 0; x < GRID_SIZE; x++) {
 		for (y = 0; y < GRID_SIZE; y++) {
@@ -122,14 +162,16 @@ void init_grid() {
 
 int main() {
 	init_grid();
-	//printf("Starting grid is:\n");
-	//print_grid();
+	print_grid();
+#if RECORD_TIME
 	struct timeval start_time;
 	struct timeval end_time;
 	long long time_taken;
 	gettimeofday(&start_time, NULL);
+#endif
 	int i;
 	for (i = 0; i < NUM_ITERATIONS; i = i + 10) {
+		// unrolled loop
 		run_tick();
 		run_tick();
 		run_tick();
@@ -141,9 +183,10 @@ int main() {
 		run_tick();
 		run_tick();
 	}
+#if RECORD_TIME
 	gettimeofday(&end_time, NULL);
 	time_taken = (end_time.tv_sec - start_time.tv_sec) * 1000000L + (end_time.tv_usec - start_time.tv_usec);
-	print_grid();
 	printf("Time taken: %lld microseconds.\n", time_taken);
+#endif
 	return 0;
 }
