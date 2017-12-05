@@ -14,7 +14,7 @@
 #define WHITE "\x1B[37m"
 #define RESET "\x1B[0m"
 
-#define SLEEP_BETWEEN_PRINTS 1
+#define SLEEP_BETWEEN_PRINTS 0
 #define PRINT_RESULTS 1
 #define RECORD_TIME 0
 
