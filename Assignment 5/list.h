@@ -13,3 +13,5 @@ List append(const char *word, List l);
 void print_list(const List l);
 void free_list(List l);
 List insert_before(const char *find, const char *word, List l);
+List insert_after(const char *find, const char *word, List l);
+void print_list_reverse(const List l);

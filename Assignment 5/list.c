@@ -25,6 +25,23 @@ static Cell * create_cell_with_word(const char *word){
 	return c;
 }
 
+List insert_after(const char *find, const char *word, List l){
+	Cell *found_cell = find_cell_with_word(find, l);
+	Cell *new_cell = create_cell_with_word(word);
+	if(l.tail == found_cell){
+		l.tail = new_cell;
+	}
+	new_cell->prev = found_cell;
+	if(found_cell->next != NULL){
+		new_cell->next = found_cell->next;
+		found_cell->next->prev = new_cell;
+		found_cell->next = new_cell;
+	} else {
+		found_cell->next = new_cell;
+	}
+	return l;
+}
+
 // TODO: empty list, other situations like that
 List insert_before(const char *find, const char *word, List l){
 	Cell *found_cell = find_cell_with_word(find, l);
@@ -32,13 +49,13 @@ List insert_before(const char *find, const char *word, List l){
 	if(l.head == found_cell){
 		l.head = new_cell;
 	}
-	if(l.tail == found_cell){
-		l.tail = new_cell;
-	}
 	new_cell->next = found_cell;
 	if(found_cell->prev != NULL){
 		new_cell->prev = found_cell->prev;
 		found_cell->prev->next = new_cell;
+		found_cell->prev = new_cell;
+	} else {
+		found_cell->prev = new_cell;
 	}
 	return l;
 }
@@ -57,7 +74,23 @@ List append(const char *word, List l){
 	return l;
 }
 
+// Prints list in reverse to verify that prev has been set correctly.
+void print_list_reverse(const List l){
+	printf("*** Printing list in reverse ***\n");
+	if(l.tail == NULL){
+		printf("List is empty.\n");
+	}
+	Cell *c = l.tail;
+	int i = 0;
+	do {
+		printf("Cell %d contains: %s\n", i, c->word);
+		c = c->prev;
+		i++;
+	} while(c != NULL);	
+}
+
 void print_list(const List l){
+	printf("*** Printing list ***\n");
 	if(l.head == NULL){
 		printf("List is empty.\n");
 	}
