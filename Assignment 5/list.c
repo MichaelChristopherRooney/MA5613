@@ -26,6 +26,9 @@ static Cell * create_cell_with_word(const char *word){
 }
 
 List insert_after(const char *find, const char *word, List l){
+	if(l.head == NULL){
+		return l;
+	}
 	Cell *found_cell = find_cell_with_word(find, l);
 	Cell *new_cell = create_cell_with_word(word);
 	if(l.tail == found_cell){
@@ -44,6 +47,9 @@ List insert_after(const char *find, const char *word, List l){
 
 // TODO: empty list, other situations like that
 List insert_before(const char *find, const char *word, List l){
+	if(l.head == NULL){
+		return l;
+	}
 	Cell *found_cell = find_cell_with_word(find, l);
 	Cell *new_cell = create_cell_with_word(word);
 	if(l.head == found_cell){
@@ -134,7 +140,11 @@ List reverse(List l){
 	return l;
 }
 
-// TODO
 void free_list(List l){
-
+	Cell *c = l.head;
+	while(c != NULL){
+		Cell *next = c->next;
+		free(c);
+		c = next;		
+	}
 }
