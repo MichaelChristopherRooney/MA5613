@@ -103,6 +103,30 @@ void print_list(const List l){
 	} while(c != NULL);	
 }
 
+// TODO: clean this up
+List reverse(List l){
+	List rev = {.head=NULL, .tail=NULL};
+	if(l.head == NULL){
+		return rev;
+	}
+	Cell *old_cell = l.tail;
+	Cell *prev_cell = calloc(1, sizeof(Cell));
+	prev_cell->word = old_cell->word;
+	Cell *next_cell = prev_cell; // handle case with 1 cell -> this will be tail and head
+	rev.head = prev_cell;
+	old_cell = old_cell->prev;
+	while(old_cell != NULL){
+		next_cell = calloc(1, sizeof(Cell));
+		next_cell->word = old_cell->word;
+		prev_cell->next = next_cell;
+		next_cell->prev = prev_cell;
+		prev_cell = next_cell;
+		old_cell = old_cell->prev;
+	} 
+	rev.tail = next_cell;
+	return rev;
+}
+
 // TODO
 void free_list(List l){
 
