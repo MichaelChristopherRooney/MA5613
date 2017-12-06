@@ -104,6 +104,7 @@ void print_list(const List l){
 }
 
 // TODO: clean this up
+/*
 List reverse(List l){
 	List rev = {.head=NULL, .tail=NULL};
 	if(l.head == NULL){
@@ -125,6 +126,43 @@ List reverse(List l){
 	} 
 	rev.tail = next_cell;
 	return rev;
+}
+*/
+
+List reverse(List l){
+	if(l.head == NULL){
+		return l;
+	}
+	/*
+	Cell *temp;
+	temp = l.head;
+	l.head = l.tail;
+	l.tail = temp;
+	*/
+	Cell *c = l.head;
+	Cell *temp;
+	do {
+		if(c->prev == NULL){ // is old head
+			temp = c->next;
+			c->next = NULL;
+			c->prev = temp;
+			c = temp;
+		} else if(c->next == NULL){ // is old tail
+			c->next = c->prev;
+			c->prev = NULL;
+			c = NULL;
+		} else {
+			temp = c->next;
+			c->next = c->prev;
+			c->prev = temp;
+			c = temp;
+		}
+	} while(c != NULL);
+	// Finally swap head and tail
+	temp = l.head;
+	l.head = l.tail;
+	l.tail = temp;
+	return l;
 }
 
 // TODO
