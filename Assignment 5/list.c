@@ -103,42 +103,12 @@ void print_list(const List l){
 	} while(c != NULL);	
 }
 
-// TODO: clean this up
-/*
-List reverse(List l){
-	List rev = {.head=NULL, .tail=NULL};
-	if(l.head == NULL){
-		return rev;
-	}
-	Cell *old_cell = l.tail;
-	Cell *prev_cell = calloc(1, sizeof(Cell));
-	prev_cell->word = old_cell->word;
-	Cell *next_cell = prev_cell; // handle case with 1 cell -> this will be tail and head
-	rev.head = prev_cell;
-	old_cell = old_cell->prev;
-	while(old_cell != NULL){
-		next_cell = calloc(1, sizeof(Cell));
-		next_cell->word = old_cell->word;
-		prev_cell->next = next_cell;
-		next_cell->prev = prev_cell;
-		prev_cell = next_cell;
-		old_cell = old_cell->prev;
-	} 
-	rev.tail = next_cell;
-	return rev;
-}
-*/
-
+// Reverse the list by traversing it and swapping the prev and next pointers in each cell.
+// Finally it then swaps the head and tail cells.
 List reverse(List l){
 	if(l.head == NULL){
 		return l;
 	}
-	/*
-	Cell *temp;
-	temp = l.head;
-	l.head = l.tail;
-	l.tail = temp;
-	*/
 	Cell *c = l.head;
 	Cell *temp;
 	do {
@@ -151,14 +121,13 @@ List reverse(List l){
 			c->next = c->prev;
 			c->prev = NULL;
 			c = NULL;
-		} else {
+		} else { // is non-head/tail cell
 			temp = c->next;
 			c->next = c->prev;
 			c->prev = temp;
 			c = temp;
 		}
 	} while(c != NULL);
-	// Finally swap head and tail
 	temp = l.head;
 	l.head = l.tail;
 	l.tail = temp;
