@@ -7,6 +7,10 @@
 // Helper function used in find_before and find_after
 static Cell * find_cell_with_word(const char *word, const List l){
 	Cell *c = l.head;
+	if(c == NULL){
+		printf("Warning: list is empty.\n");
+		return NULL;
+	}
 	do {
 		if(strcmp(c->word, word) == 0){
 			return c;
@@ -25,11 +29,12 @@ static Cell * create_cell_with_word(const char *word){
 	return c;
 }
 
-List insert_after(const char *find, const char *word, List l){
-	if(l.head == NULL){
+List insert_after(char *find, char *word, List l){
+	Cell *found_cell = find_cell_with_word(find, l);
+	if(found_cell == NULL){
+		printf("Warning: %s was not found in the list, not inserting %s\n", find, word);
 		return l;
 	}
-	Cell *found_cell = find_cell_with_word(find, l);
 	Cell *new_cell = create_cell_with_word(word);
 	if(l.tail == found_cell){
 		l.tail = new_cell;
@@ -45,11 +50,12 @@ List insert_after(const char *find, const char *word, List l){
 	return l;
 }
 
-List insert_before(const char *find, const char *word, List l){
-	if(l.head == NULL){
+List insert_before(char *find, char *word, List l){
+	Cell *found_cell = find_cell_with_word(find, l);
+	if(found_cell == NULL){
+		printf("Warning: %s was not found in the list, not inserting %s\n", find, word);
 		return l;
 	}
-	Cell *found_cell = find_cell_with_word(find, l);
 	Cell *new_cell = create_cell_with_word(word);
 	if(l.head == found_cell){
 		l.head = new_cell;
@@ -65,7 +71,7 @@ List insert_before(const char *find, const char *word, List l){
 	return l;
 }
 
-List append(const char *word, List l){
+List append(char *word, List l){
 	if(l.head == NULL){
 		Cell *c = create_cell_with_word(word);
 		l.head = c;
@@ -80,7 +86,7 @@ List append(const char *word, List l){
 }
 
 // Prints list in reverse to verify that prev has been set correctly.
-void print_list_reverse(const List l){
+void print_list_reverse(List l){
 	printf("*** Printing list in reverse ***\n");
 	if(l.tail == NULL){
 		printf("List is empty.\n");
@@ -94,7 +100,7 @@ void print_list_reverse(const List l){
 	} while(c != NULL);	
 }
 
-void print_list(const List l){
+void print_list(List l){
 	printf("*** Printing list ***\n");
 	if(l.head == NULL){
 		printf("List is empty.\n");
@@ -111,28 +117,14 @@ void print_list(const List l){
 // Reverse the list by traversing it and swapping the prev and next pointers in each cell.
 // Finally it then swaps the head and tail cells.
 List reverse(List l){
-	if(l.head == NULL){
-		return l;
-	}
 	Cell *c = l.head;
 	Cell *temp;
-	do {
-		if(c->prev == NULL){ // is old head
-			temp = c->next;
-			c->next = NULL;
-			c->prev = temp;
-			c = temp;
-		} else if(c->next == NULL){ // is old tail
-			c->next = c->prev;
-			c->prev = NULL;
-			c = NULL;
-		} else { // is non-head/tail cell
-			temp = c->next;
-			c->next = c->prev;
-			c->prev = temp;
-			c = temp;
-		}
-	} while(c != NULL);
+	while(c != NULL){
+		temp = c->next;
+		c->next = c->prev;
+		c->prev = temp;
+		c = temp;
+	}
 	temp = l.head;
 	l.head = l.tail;
 	l.tail = temp;

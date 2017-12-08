@@ -9,10 +9,10 @@ typedef struct {
 	struct Cell_struct *tail;
 } List;
 
-List append(const char *word, List l);
-void print_list(const List l);
+List append(char *word, List l);
+void print_list(List l);
 void free_list(List l);
-List insert_before(const char *find, const char *word, List l);
-List insert_after(const char *find, const char *word, List l);
-void print_list_reverse(const List l);
+List insert_before(char *find, char *word, List l);
+List insert_after(char *find, char *word, List l);
+void print_list_reverse(List l);
 List reverse(List l);
