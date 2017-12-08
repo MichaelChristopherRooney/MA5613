@@ -45,7 +45,6 @@ List insert_after(const char *find, const char *word, List l){
 	return l;
 }
 
-// TODO: empty list, other situations like that
 List insert_before(const char *find, const char *word, List l){
 	if(l.head == NULL){
 		return l;
