@@ -31,7 +31,7 @@ static Cell * create_cell_with_word(const char *word){
 
 // Helper function that strips newline character before inserting word
 static Cell * create_cell_with_word_with_newline(const char *word){
-	int wlen = strlen(word); // EXCLUDES \0 byte
+	int wlen = strlen(word) + 1; // includes \0 byte
 	Cell *c = calloc(1, sizeof(Cell));
 	c->word = malloc(wlen);	
 	memcpy(c->word, word, wlen);
@@ -42,15 +42,14 @@ static Cell * create_cell_with_word_with_newline(const char *word){
 // Takes a line from the input file and splits it into tokens based on spaces and newlines.
 // Example: "one two three\n" will be split into "one", "two" and "three".
 // If strtok returns NULL on the first call it means the line is empty.
-// Returns 1 if empty line, else 0
-static int set_cells_from_string(char *str, Cell **first, Cell **last){
-	char *tok = strtok(str, " \n");
+// Returns 0 if line is empty
+static int set_cells_from_string(char *line, Cell **first, Cell **last){
+	char *tok = strtok(line, " \n");
 	if(tok == NULL){
-		return 1;
+		return 0;
 	}
 	Cell *c = create_cell_with_word_with_newline(tok);
 	*first = c;
-	*last = c;
 	while((tok = strtok(NULL, " \n")) != NULL){
 		Cell *temp = create_cell_with_word_with_newline(tok);
 		c->next = temp;
@@ -58,7 +57,7 @@ static int set_cells_from_string(char *str, Cell **first, Cell **last){
 		c = temp;
 	}
 	*last = c;
-	return 0;
+	return 1;
 }
 
 List read_textfile(char *filename){
@@ -66,33 +65,31 @@ List read_textfile(char *filename){
 	List l = {.head=NULL, .tail=NULL};
 	FILE *fp = fopen(filename, "r");
 	char *buffer = malloc(sizeof(char) * size);
+	Cell *first, *last, *prev_last;
+	int is_first_valid_line = 1;
 	if(!fp){
 		printf("Warning: %s does not exist.\n", filename);
 		return l;
 	}
-	if(feof(fp)){
-		printf("Warning: %s is empty.\n", filename);
-		return l;
-	}
-	// Do first line to set the head
-	Cell *first, *last, *prev;
-	getline(&buffer, &size, fp);
-	set_cells_from_string(buffer, &first, &last);
-	l.head = first;
-	prev = last;
 	while(1){
 		getline(&buffer, &size, fp);
 		if(feof(fp)){
 			break;
 		}
-		int result = set_cells_from_string(buffer, &first, &last);
-		if(result == 0){
-			prev->next = first;
-			first->prev = prev;
-			prev = last;
+		if(!set_cells_from_string(buffer, &first, &last)){ // ignore empty lines
+			continue;
+		}
+		if(is_first_valid_line){ // set the head on the first read
+			l.head = first;
+			prev_last = last;
+			is_first_valid_line = 0;
+		} else {
+			prev_last->next = first;
+			first->prev = prev_last;
+			prev_last = last;
 		}
 	}
-	l.tail = prev;
+	l.tail = prev_last;
 	return l;
 }
 
