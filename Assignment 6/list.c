@@ -90,7 +90,62 @@ List read_textfile(char *filename){
 		}
 	}
 	l.tail = prev_last;
+	fclose(fp);
 	return l;
+}
+
+List read_binfile(char *filename){
+	List l = {.head=NULL, .tail=NULL};
+	FILE *fp = fopen(filename, "rb");
+	if(!fp){
+		printf("Warning: failed to open %s\n", filename);
+		return l;
+	}
+	int total;
+	fread(&total, sizeof(int), 1, fp);
+	int longest_word;
+	fread(&longest_word, sizeof(int), 1, fp);
+	char *buf = malloc(sizeof(char) * longest_word);
+	int i;
+	for(i = 0; i < total; i++){
+		int wlen;
+		fread(&wlen, sizeof(int), 1, fp);
+		fread(buf, sizeof(char), wlen, fp);
+		l = append(buf, l);
+	}
+	free(buf);
+	fclose(fp);
+	return l;
+}
+
+void write_binfile(List l, char *filename){
+	FILE *fp = fopen(filename, "wb+");
+	if(!fp){
+		printf("Warning: failed to create %s\n", filename);
+		return;
+	}
+	// This part of the file will be overwritten once the total and largest word is known.
+	int total = 0;
+	fwrite(&total, sizeof(int), 1, fp);
+	int largest_word = 0;
+	fwrite(&total, sizeof(int), 1, fp);
+	Cell *c = l.head;
+	while(c != NULL){
+		total++;
+		int wlen = strlen(c->word) + 1; // includes \0 byte
+		fwrite(&wlen, sizeof(int), 1, fp);
+		fwrite(c->word, 1, wlen, fp);
+		if(wlen > largest_word){
+			largest_word = wlen;
+		}
+		c = c->next;
+	}
+	// Now fill in the total at the start
+	rewind(fp);
+	fwrite(&total, sizeof(int), 1, fp);
+	fwrite(&largest_word, sizeof(int), 1, fp);
+	fclose(fp);
+	return;
 }
 
 List insert_after(char *find, char *word, List l){

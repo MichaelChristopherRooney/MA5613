@@ -17,3 +17,5 @@ List insert_before(char *find, char *word, List l);
 List insert_after(char *find, char *word, List l);
 void print_list_reverse(List l);
 List reverse(List l);
+void write_binfile(List l, char *filename);
+List read_binfile(char *filename);

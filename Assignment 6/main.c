@@ -153,7 +153,12 @@ void run_all_tests(){
 
 int main(void){
 	//run_all_tests();
-	List l = read_textfile("hi.txt");
+	//List l = {.head=NULL, .tail=NULL};
+	//l = append("one", l);
+	//l = append("two", l);
+	//l = append("three", l);
+	//write_binfile(l, "hi.bin");
+	List l = read_binfile("hi.bin");
 	print_list(l);
 	print_list_reverse(l);
 	return 0;
