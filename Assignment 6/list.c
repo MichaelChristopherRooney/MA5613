@@ -44,7 +44,7 @@ static Cell * create_cell_with_word_with_newline(const char *word){
 // If strtok returns NULL on the first call it means the line is empty.
 // Returns 0 if line is empty
 static int set_cells_from_string(char *line, Cell **first, Cell **last){
-	char *tok = strtok(line, " \n");
+	char *tok = strtok(line, " \n"); // tokens are space and newline
 	if(tok == NULL){
 		return 0;
 	}
@@ -79,7 +79,7 @@ List read_textfile(char *filename){
 		if(!set_cells_from_string(buffer, &first, &last)){ // ignore empty lines
 			continue;
 		}
-		if(is_first_valid_line){ // set the head on the first read
+		if(is_first_valid_line){ // set the head on the first non-empty read
 			l.head = first;
 			prev_last = last;
 			is_first_valid_line = 0;
@@ -92,6 +92,22 @@ List read_textfile(char *filename){
 	l.tail = prev_last;
 	fclose(fp);
 	return l;
+}
+
+void write_textfile(List l, char *filename){
+	FILE *fp = fopen(filename, "w+");
+	if(!fp){
+		printf("Warning: failed to create %s\n", filename);
+		return;
+	}
+	Cell *c = l.head;
+	while(c != NULL){
+		fputs(c->word, fp);
+		fputs("\n", fp); // fputs does not insert a newline
+		c = c->next;
+	}
+	fflush(fp);
+	fclose(fp);
 }
 
 List read_binfile(char *filename){
@@ -144,6 +160,7 @@ void write_binfile(List l, char *filename){
 	rewind(fp);
 	fwrite(&total, sizeof(int), 1, fp);
 	fwrite(&largest_word, sizeof(int), 1, fp);
+	fflush(fp);
 	fclose(fp);
 	return;
 }

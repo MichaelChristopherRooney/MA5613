@@ -39,128 +39,64 @@ static int compare_expected_and_list(const char *test_name, List l, const char *
 	return 0;
 }
 
-// Tests the append function going forward in the list
-static int test_append_forward(){
-	printf("Running test: %s\n", __FUNCTION__);
-	const char *expected_words[] = { "one", "two", "three" };
+// Writes to a binary file then reads the data back in.
+// Checks that all expected words are present and in the correct location.
+// Checks that both next and prev have been set properly
+static void test_binary_file(char *filename){
 	List l = {.head=NULL, .tail=NULL};
 	l = append("one", l);
 	l = append("two", l);
 	l = append("three", l);
-	return compare_expected_and_list(__FUNCTION__, l, expected_words, sizeof(expected_words) / sizeof(char *), FORWARD);
+	write_binfile(l, filename);
+	l = read_binfile(filename);
+	// First check that the prev field has been set correctly.
+	const char *expected_forward[] = { "one", "two", "three" };
+	int result = compare_expected_and_list("Binary file", l, expected_forward, 3, FORWARD);
+	if(result == 1){
+		printf("Binary file test failed using forward traversal!\n");
+	} else {
+		printf("Binary file test passed using forward traversal!\n");
+	}
+	// Now check that the prev field has been set correctly.
+	const char *expected_backward[] = { "three", "two", "one",};
+	result = compare_expected_and_list("Binary file", l, expected_backward, 3, BACKWARD);
+	if(result == 1){
+		printf("Binary file test failed using backward traversal!\n");
+	} else {
+		printf("Binary file test passed using backward traversal!\n");
+	}
 }
 
-// Tests the append function going backward in the list
-static int test_append_backward(){
-	printf("Running test: %s\n", __FUNCTION__);
-	const char *expected_words[] = { "three", "two", "one" };
+static void test_text_file(char *filename){
 	List l = {.head=NULL, .tail=NULL};
 	l = append("one", l);
 	l = append("two", l);
 	l = append("three", l);
-	return compare_expected_and_list(__FUNCTION__, l, expected_words, sizeof(expected_words) / sizeof(char *), BACKWARD);
-}
-
-// Tests reversing a list that contains multiple pieces of data.
-static int test_reverse_list_many(){
-	printf("Running test: %s\n", __FUNCTION__);
-	const char *expected_words[] = { "three", "two", "one" };
-	List l = {.head=NULL, .tail=NULL};
-	l = append("one", l);
-	l = append("two", l);
-	l = append("three", l);
-	l = reverse(l);
-	return compare_expected_and_list(__FUNCTION__, l, expected_words, sizeof(expected_words) / sizeof(char *), FORWARD);
-}
-
-// Tests reversing a list that contains two pieces of data.
-static int test_reverse_list_double(){
-	printf("Running test: %s\n", __FUNCTION__);
-	const char *expected_words[] = { "two", "one" };
-	List l = {.head=NULL, .tail=NULL};
-	l = append("one", l);
-	l = append("two", l);
-	l = reverse(l);
-	return compare_expected_and_list(__FUNCTION__, l, expected_words, sizeof(expected_words) / sizeof(char *), FORWARD);
-}
-
-// Tests reversing a list that contains two pieces of data.
-static int test_reverse_list_single(){
-	printf("Running test: %s\n", __FUNCTION__);
-	const char *expected_words[] = { "one" };
-	List l = {.head=NULL, .tail=NULL};
-	l = append("one", l);
-	l = reverse(l);
-	return compare_expected_and_list(__FUNCTION__, l, expected_words, sizeof(expected_words) / sizeof(char *), FORWARD);
-}
-
-// Tests the insert before and insert after functions
-static int test_insert_before_and_after_forward(){
-	printf("Running test: %s\n", __FUNCTION__);
-	const char *expected_words[] = { "one", "two", "three", "four" };
-	List l = {.head=NULL, .tail=NULL};
-	l = append("one", l);
-	insert_after("one", "four", l);
-	insert_before("four", "three", l);
-	insert_before("three", "two", l);
-	return compare_expected_and_list(__FUNCTION__, l, expected_words, sizeof(expected_words) / sizeof(char *), FORWARD);
-}
-
-// Tests the insert before and insert after functions
-static int test_insert_before_and_after_backward(){
-	printf("Running test: %s\n", __FUNCTION__);
-	const char *expected_words[] = { "four", "three", "two", "one" };
-	List l = {.head=NULL, .tail=NULL};
-	l = append("one", l);
-	l = insert_after("one", "four", l);
-	l = insert_before("four", "three", l);
-	l = insert_before("three", "two", l);
-	return compare_expected_and_list(__FUNCTION__, l, expected_words, sizeof(expected_words) / sizeof(char *), BACKWARD);
-}
-
-// Tests the free function
-// Not really anyway to verify this since the free_list specification doesn't
-// return anything.
-static int test_free(){
-	printf("Running test: %s\n", __FUNCTION__);
-	List l = {.head=NULL, .tail=NULL};
-	l = append("one", l);
-	l = append("two", l);
-	free_list(l);
-	return 0;
-}
-
-// An array of function pointers that contains the test functions.
-static int (*const TEST_FUNCS[]) (void) = { 
-	test_append_forward, test_append_backward, test_reverse_list_many,
-	test_reverse_list_double, test_reverse_list_single, test_insert_before_and_after_forward,
-	test_insert_before_and_after_backward, test_free
-};
-
-void run_all_tests(){
-	int num_tests = sizeof(TEST_FUNCS) / sizeof(*TEST_FUNCS);
-	int i;
-	for(i = 0; i < num_tests; i++){
-		int result = (*TEST_FUNCS[i])();
-		if(result == 1){
-			printf("*** Test failed. ***\n");
-		} else {
-			printf("Test passed.\n");
-		}
-		
+	write_textfile(l, filename);
+	l = read_textfile(filename);
+	// First check that the prev field has been set correctly.
+	const char *expected_forward[] = { "one", "two", "three" };
+	int result = compare_expected_and_list("Text file", l, expected_forward, 3, FORWARD);
+	if(result == 1){
+		printf("Text file test failed using forward traversal!\n");
+	} else {
+		printf("Text file test passed using forward traversal!\n");
+	}
+	// Now check that the prev field has been set correctly.
+	const char *expected_backward[] = { "three", "two", "one",};
+	result = compare_expected_and_list("Text file", l, expected_backward, 3, BACKWARD);
+	if(result == 1){
+		printf("Text file test failed using backward traversal!\n");
+	} else {
+		printf("Text file test passed using backward traversal!\n");
 	}
 }
 
 int main(void){
-	//run_all_tests();
-	//List l = {.head=NULL, .tail=NULL};
-	//l = append("one", l);
-	//l = append("two", l);
-	//l = append("three", l);
-	//write_binfile(l, "hi.bin");
-	List l = read_binfile("hi.bin");
-	print_list(l);
-	print_list_reverse(l);
+	// NOTE: if changing the tests make sure you update the expected word arrays for BOTH directions.
+	// Ex: use { "one", "two" } when traversing forward, and { "two", "one" } when traversing backward.
+	test_binary_file("hi.bin");
+	test_text_file("hi.txt");
 	return 0;
 }
 

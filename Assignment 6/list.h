@@ -10,6 +10,7 @@ typedef struct {
 } List;
 
 List read_textfile(char *filename);
+void write_textfile(List l, char *filename);
 List append(char *word, List l);
 void print_list(List l);
 void free_list(List l);
