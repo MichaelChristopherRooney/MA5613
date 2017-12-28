@@ -7,12 +7,21 @@ struct connection_cell {
 	struct connection_cell *next;
 };
 
-struct vertex {
+// This stores the vertex number (id), the connected vertices' numbers,
+// and the next vertex in the overall list of vertices.
+// Note: the next vertex may not have any connection/relationship to the
+// current vertex, it is just the next vertex loaded from the file.
+struct vertex_cell {
 	int number;
 	struct connection_cell *connections;
+	struct vertex_cell *next;
 };
 
-static void print_vertex_connections(struct vertex *v){
+// The head and tail of a list that stores all vertices
+struct vertex_cell *vertex_head = NULL;
+struct vertex_cell *vertex_tail = NULL;
+
+static void print_vertex_connections(struct vertex_cell *v){
 	if(v->connections == NULL){
 		printf("Vertex %d has no connections.\n", v->number);
 		return;
@@ -40,17 +49,23 @@ static void parse_vertex_from_line(char *line){
 		printf("Warning: line contains no data after tokenisation - ignoring it.\n");
 		return;
 	}
-	struct vertex v; // TODO: store this somewhere outside of this function
-	v.number = atoi(tok);
+	struct vertex_cell *v = malloc(sizeof(struct vertex_cell));
+	if(vertex_head == NULL){
+		vertex_head = v;
+	} else {
+		vertex_tail->next = v;
+	}
+	vertex_tail = v;
+	v->number = atoi(tok);
 	struct connection_cell *prev = NULL;
 	struct connection_cell *cur = NULL;
 	int is_first = 1;
 	while((tok = strtok(NULL, ";\n")) != NULL){
 		if(is_first){
 			is_first = 0;
-			v.connections = malloc(sizeof(struct connection_cell));
-			v.connections->number = atoi(tok);
-			prev = v.connections;
+			v->connections = malloc(sizeof(struct connection_cell));
+			v->connections->number = atoi(tok);
+			prev = v->connections;
 		} else {
 			cur = malloc(sizeof(struct connection_cell));
 			cur->number = atoi(tok);
@@ -58,7 +73,6 @@ static void parse_vertex_from_line(char *line){
 			prev = cur;
 		}
 	}
-	print_vertex_connections(&v);
 }
 
 static int read_vertices_from_file(char *filename){
@@ -89,6 +103,11 @@ int main(int argc, char *argv[]){
 	printf("Filename is: %s\n", filename);
 	if(read_vertices_from_file(filename) == 1){
 		return 1;
-	}	
+	}
+	struct vertex_cell *cur = vertex_head;
+	while(cur != NULL){
+		print_vertex_connections(cur);
+		cur = cur->next;
+	}
 	return 0;
 }
