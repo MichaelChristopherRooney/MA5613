@@ -2,21 +2,63 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct connection_cell {
+	int number;
+	struct connection_cell *next;
+};
+
+struct vertex {
+	int number;
+	struct connection_cell *connections;
+};
+
+static void print_vertex_connections(struct vertex *v){
+	if(v->connections == NULL){
+		printf("Vertex %d has no connections.\n", v->number);
+		return;
+	}
+	printf("Vertex %d is connected to: ", v->number);
+	struct connection_cell *c = v->connections;
+	while(c != NULL){
+		if(c->next == NULL){
+			printf("%d.\n", c->number);			
+		} else {
+			printf("%d, ", c->number);
+		}
+		c = c->next;
+	}
+	return;
+}
+
 // Takes a line from the input file, tokenises it and then creates vertices from it.
 // Example: "0;1;2\n" is split into "0", "1", "2", which is taken to be mean that 
 // vertex 0 is connected to vertices 1 and 2.
 // Tokens are ';' and '\n'
-static int parse_vertices_from_line(char *line){
+static void parse_vertex_from_line(char *line){
 	char *tok = strtok(line, ";\n");
 	if(tok == NULL){
-		printf("Error: empty line.\n");
-		return 1;
+		printf("Warning: line contains no data after tokenisation - ignoring it.\n");
+		return;
 	}
-	printf("Found token: %s\n", tok);
+	struct vertex v; // TODO: store this somewhere outside of this function
+	v.number = atoi(tok);
+	struct connection_cell *prev = NULL;
+	struct connection_cell *cur = NULL;
+	int is_first = 1;
 	while((tok = strtok(NULL, ";\n")) != NULL){
-		printf("Found token: %s\n", tok);
+		if(is_first){
+			is_first = 0;
+			v.connections = malloc(sizeof(struct connection_cell));
+			v.connections->number = atoi(tok);
+			prev = v.connections;
+		} else {
+			cur = malloc(sizeof(struct connection_cell));
+			cur->number = atoi(tok);
+			prev->next = cur;
+			prev = cur;
+		}
 	}
-	return 0;
+	print_vertex_connections(&v);
 }
 
 static int read_vertices_from_file(char *filename){
@@ -32,8 +74,7 @@ static int read_vertices_from_file(char *filename){
 		if(feof(fp)){
 			break;
 		}
-		printf("Line is: %s", buffer);
-		parse_vertices_from_line(buffer);
+		parse_vertex_from_line(buffer);
 	}
 	fclose(fp);
 	return 0;
