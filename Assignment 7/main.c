@@ -11,6 +11,7 @@ struct vertex_cell {
 	struct vertex_cell **connections;
 	int num_connections;
 	int connection_array_size;
+	int in_subgraph; // TODO: change to subgraph link
 };
 
 const int CONNECTIONS_ARRAY_START_SIZE = 32;
@@ -100,6 +101,90 @@ static int read_vertices_from_file(char *filename){
 	return 0;
 }
 
+struct subgraph_entry {
+	struct vertex_cell *vertex;
+	struct subgraph_entry *next;
+};
+
+struct subgraph {
+	struct subgraph_entry *head;
+	struct subgraph_entry *tail;
+	struct subgraph *next;		
+};
+
+struct subgraph *subgraphs;
+
+static int does_subgraph_contain_vertex(struct subgraph *s, struct vertex_cell *v){
+	struct subgraph_entry *e = s->head;
+	while(e != NULL){
+		if(e->vertex->number == v->number){
+			return 1;
+		}
+		e = e->next;
+	}
+	return 0;
+}
+
+static void insert_vertex_into_subgraph(struct subgraph *s, struct vertex_cell *v){
+	if(s->head == NULL){ // v will be first entry
+		s->head = calloc(1, sizeof(struct subgraph_entry));
+		s->tail = s->head;
+		s->head->vertex = v;
+	} else {
+		s->tail->next = calloc(1, sizeof(struct subgraph_entry));
+		s->tail = s->tail->next;
+		s->tail->vertex = v;
+	}
+	v->in_subgraph = 1;
+}
+
+static void print_subgraphs(){
+	struct subgraph *s = subgraphs;
+	while(s != NULL){
+		printf("Subgraph contains vertices: ");
+		struct subgraph_entry *e = s->head;
+		while(e != NULL){
+			printf("%d, ", e->vertex->number);
+			e = e->next;
+		}
+		printf("\n");
+		s = s->next;
+	}
+}
+
+// TODO: comment
+// Recursively...
+// origin_vertex is the connection vertex the current recurisve call is coming from.
+// origin_vertex will be -1 if it is the first call.
+// TODO: does not yet handle multiple connections
+static void find_subgraph_from_starting_vertex(struct subgraph *s, struct vertex_cell *v, int origin_vertex){
+	printf("%d\n", v->number);
+	if(does_subgraph_contain_vertex(s, v) == 0){
+		insert_vertex_into_subgraph(s, v);
+	}
+	int i;
+	for(i = 0; i < v->num_connections; i++){
+		if(i != origin_vertex){
+			find_subgraph_from_starting_vertex(s, v->connections[i], v->number);
+		}
+	}
+}
+
+static void find_subgraphs(){
+	struct subgraph *s = subgraphs;
+	int i;
+	for(i = 0; i < NUM_VERTICES; i++){
+		if(ALL_VERTICES[i].in_subgraph == 1){
+			continue;
+		}
+		find_subgraph_from_starting_vertex(s, &(ALL_VERTICES[i]), -1);
+		if(i != NUM_VERTICES - 1){
+			s->next = calloc(1, sizeof(struct subgraph));
+			s = s->next;
+		}
+	}
+}
+
 int main(int argc, char *argv[]){
 	if(argc != 2){
 		printf("Error: expected filename passed as arg!\n");
@@ -115,6 +200,8 @@ int main(int argc, char *argv[]){
 	for(i = 0; i < NUM_VERTICES; i++){
 		print_vertex_connections(&(ALL_VERTICES[i]));
 	}
-	
+	subgraphs = calloc(1, sizeof(struct subgraph));
+	find_subgraphs();
+	print_subgraphs();	
 	return 0;
 }
