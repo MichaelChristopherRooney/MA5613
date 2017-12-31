@@ -101,8 +101,11 @@ static int read_vertices_from_file(char *filename){
 	return 0;
 }
 
+// connections_visited is used to prevent inifite loops by recording
+// that we have already visited this entry's connections.
 struct subgraph_entry {
 	struct vertex_cell *vertex;
+	int connections_visited;
 	struct subgraph_entry *next;
 };
 
@@ -114,18 +117,18 @@ struct subgraph {
 
 struct subgraph *subgraphs;
 
-static int does_subgraph_contain_vertex(struct subgraph *s, struct vertex_cell *v){
+static struct subgraph_entry *get_subgraph_entry_for_vertex(struct subgraph *s, struct vertex_cell *v){
 	struct subgraph_entry *e = s->head;
 	while(e != NULL){
 		if(e->vertex->number == v->number){
-			return 1;
+			return e;
 		}
 		e = e->next;
 	}
-	return 0;
+	return NULL;
 }
 
-static void insert_vertex_into_subgraph(struct subgraph *s, struct vertex_cell *v){
+static struct subgraph_entry *insert_vertex_into_subgraph(struct subgraph *s, struct vertex_cell *v){
 	if(s->head == NULL){ // v will be first entry
 		s->head = calloc(1, sizeof(struct subgraph_entry));
 		s->tail = s->head;
@@ -136,6 +139,7 @@ static void insert_vertex_into_subgraph(struct subgraph *s, struct vertex_cell *
 		s->tail->vertex = v;
 	}
 	v->in_subgraph = 1;
+	return s->tail;
 }
 
 static void print_subgraphs(){
@@ -154,22 +158,27 @@ static void print_subgraphs(){
 
 // TODO: comment
 // Recursively...
-// origin_vertex is the connection vertex the current recurisve call is coming from.
-// origin_vertex will be -1 if it is the first call.
-// TODO: does not yet handle multiple connections
-static void find_subgraph_from_starting_vertex(struct subgraph *s, struct vertex_cell *v, int origin_vertex){
-	printf("%d\n", v->number);
-	if(does_subgraph_contain_vertex(s, v) == 0){
-		insert_vertex_into_subgraph(s, v);
+static void find_subgraph_from_starting_vertex(struct subgraph *s, struct vertex_cell *v){
+	struct subgraph_entry *e = get_subgraph_entry_for_vertex(s, v);
+	if(e == NULL){
+		e = insert_vertex_into_subgraph(s, v);
 	}
+	e->connections_visited = 1;
 	int i;
 	for(i = 0; i < v->num_connections; i++){
-		if(i != origin_vertex){
-			find_subgraph_from_starting_vertex(s, v->connections[i], v->number);
+		struct vertex_cell *v_conn = v->connections[i];
+		struct subgraph_entry *e_conn = get_subgraph_entry_for_vertex(s, v_conn);
+		int conn_visited = 0;
+		if(e_conn != NULL){
+			conn_visited = e_conn->connections_visited;
+		}
+		if(conn_visited == 0){
+			find_subgraph_from_starting_vertex(s, v_conn);
 		}
 	}
 }
 
+// TODO: there is a blank subgraph left at the end sometimes 
 static void find_subgraphs(){
 	struct subgraph *s = subgraphs;
 	int i;
@@ -177,7 +186,7 @@ static void find_subgraphs(){
 		if(ALL_VERTICES[i].in_subgraph == 1){
 			continue;
 		}
-		find_subgraph_from_starting_vertex(s, &(ALL_VERTICES[i]), -1);
+		find_subgraph_from_starting_vertex(s, &(ALL_VERTICES[i]));
 		if(i != NUM_VERTICES - 1){
 			s->next = calloc(1, sizeof(struct subgraph));
 			s = s->next;
