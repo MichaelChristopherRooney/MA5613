@@ -178,19 +178,21 @@ static void find_subgraph_from_starting_vertex(struct subgraph *s, struct vertex
 	}
 }
 
-// TODO: there is a blank subgraph left at the end sometimes 
+// Note: the first vertex is handled outside of the for loop, so the for loop
+// starts at i=1.
 static void find_subgraphs(){
-	struct subgraph *s = subgraphs;
+	struct subgraph *cur = subgraphs;
+	struct subgraph *next;
+	find_subgraph_from_starting_vertex(cur, &(ALL_VERTICES[0]));
 	int i;
-	for(i = 0; i < NUM_VERTICES; i++){
+	for(i = 1; i < NUM_VERTICES; i++){
 		if(ALL_VERTICES[i].in_subgraph == 1){
 			continue;
 		}
-		find_subgraph_from_starting_vertex(s, &(ALL_VERTICES[i]));
-		if(i != NUM_VERTICES - 1){
-			s->next = calloc(1, sizeof(struct subgraph));
-			s = s->next;
-		}
+		next = calloc(1, sizeof(struct subgraph));
+		cur->next = next;
+		cur = next;
+		find_subgraph_from_starting_vertex(cur, &(ALL_VERTICES[i]));
 	}
 }
 
