@@ -63,3 +63,4 @@ int read_vertices_from_file(char *filename){
 	fclose(fp);
 	return 0;
 }
+

@@ -1,10 +1,10 @@
-OBJECTS = main.o vertex_loader.o subgraph.o
+OBJECTS = main.o vertex_loader.o subgraph.o distance_finder.o
 CC = gcc
 CFLAGS = -Wall
 EXEC_NAME = prog
 
-all: main.o vertex_loader.o subgraph.o
-	$(CC) -o $(EXEC_NAME) main.o vertex_loader.o subgraph.o $(CFLAGS)
+all: main.o vertex_loader.o subgraph.o distance_finder.o
+	$(CC) -o $(EXEC_NAME) main.o vertex_loader.o subgraph.o distance_finder.o $(CFLAGS)
 
 main.o: main.c common.h
 	$(CC) -c main.c $(CFLAGS)
@@ -14,6 +14,9 @@ vertex_loader.o: vertex_loader.c common.h
 
 subgraph.o: subgraph.c common.h
 	$(CC) -c subgraph.c $(CFLAGS)
+
+distance_finder.o: distance_finder.c common.h
+	$(CC) -c distance_finder.c $(CFLAGS)
 
 clean:
 	rm -f $(OBJECTS) $(EXEC_NAME)
