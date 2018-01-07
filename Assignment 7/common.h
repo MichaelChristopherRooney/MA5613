@@ -39,18 +39,15 @@ int read_vertices_from_file(char *filename);
 struct subgraph_entry {
 	struct vertex_cell *vertex;
 	int connections_visited;
-	struct subgraph_entry *next;
 };
 
 struct subgraph {
-	struct subgraph_entry *head;
-	struct subgraph_entry *tail;
-	struct subgraph *next;
+	struct list *entries;
 	int num_vertices;
 	int id;
 };
 
-struct subgraph *subgraphs;
+struct list *subgraphs;
 
 int NUM_SUBGRAPHS;
 

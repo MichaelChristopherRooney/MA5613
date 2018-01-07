@@ -121,22 +121,24 @@ static void print_histogram(struct list *hl){
 
 static void find_distance_between_subgraph_vertices(struct subgraph *s){
 	struct list *hist_list = calloc(1, sizeof(struct list));
-	struct subgraph_entry *e1 = s->head;
-	struct subgraph_entry *e2 = s->head->next;
-	if(e2 == NULL){
+	struct list_entry *l1 = s->entries->head;
+	struct list_entry *l2 = s->entries->head->next;
+	if(l2 == NULL){
 		printf("Only one entry - cannot calculate any distances\n");
 		return;
 	}
-	while(e1 != NULL){
-		while(e2 != NULL){
+	while(l1 != NULL){
+		while(l2 != NULL){
+			struct subgraph_entry *e1 = l1->data;
+			struct subgraph_entry *e2 = l2->data;
 			struct visited_vertex_list *visited = calloc(1, sizeof(struct visited_vertex));
 			int distance = find_distance_between_vertices(s, e1->vertex, e2->vertex, 0, visited, 0);
 			store_distance_in_histogram(s, hist_list, distance);
-			e2 = e2->next;
+			l2 = l2->next;
 		}
-		e1 = e1->next;
-		if(e1 != NULL){
-			e2 = e1->next;
+		l1 = l1->next;
+		if(l1 != NULL){
+			l2 = l1->next;
 		}
 	}
 	print_histogram(hist_list);
@@ -144,11 +146,11 @@ static void find_distance_between_subgraph_vertices(struct subgraph *s){
 
 void print_distance_histograms(){
 	int i = 0;
-	struct subgraph *cur = subgraphs;
-	while(cur != NULL){
+	struct list_entry *l = subgraphs->head;
+	while(l != NULL){
 		printf("Subgraph %d:\n", i);
-		find_distance_between_subgraph_vertices(cur);
-		cur = cur->next;
+		find_distance_between_subgraph_vertices(l->data);
+		l = l->next;
 		i++;
 	}	
 }
