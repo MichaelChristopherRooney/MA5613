@@ -3,12 +3,6 @@
 struct histogram_entry {
 	int distance;
 	int num_vertices;
-	struct histogram_entry *next;
-};
-
-struct histogram_list {
-	struct histogram_entry *head;
-	struct histogram_entry *tail;
 };
 
 struct visited_vertex {
@@ -88,31 +82,26 @@ static int find_distance_between_vertices(struct subgraph *s, struct vertex_cell
 	return shortest_distance;
 }
 
-static struct histogram_entry *find_distance_in_histogram(struct histogram_list *hl, int distance){
-	struct histogram_entry *e = hl->head;
+static struct histogram_entry *find_distance_in_histogram(struct list *hl, int distance){
+	struct list_entry *e = hl->head;
 	while(e != NULL){
-		if(e->distance == distance){
-			return e;
+		struct histogram_entry *he = e->data;
+		if(he->distance == distance){
+			return he;
 		}
 		e = e->next;
 	}
 	return NULL;
 }
 
-static struct histogram_entry *add_entry_to_histogram(struct histogram_list *hl, int distance){
+static struct histogram_entry *add_entry_to_histogram(struct list *hl, int distance){
 	struct histogram_entry *e = calloc(1, sizeof(struct histogram_entry));
 	e->distance = distance;
-	if(hl->head == NULL){
-		hl->head = e;
-		hl->tail = e;
-	} else {
-		hl->tail->next = e;
-		hl->tail = e;
-	}
+	append_entry_to_list(hl, e);
 	return e;
 }
 
-static void store_distance_in_histogram(struct subgraph *s, struct histogram_list *hl, int distance){
+static void store_distance_in_histogram(struct subgraph *s, struct list *hl, int distance){
 	struct histogram_entry *e = find_distance_in_histogram(hl, distance);
 	if(e == NULL){
 		e = add_entry_to_histogram(hl, distance);
@@ -120,17 +109,18 @@ static void store_distance_in_histogram(struct subgraph *s, struct histogram_lis
 	e->num_vertices++;
 }
 
-static void print_histogram(struct histogram_list *hl){
+static void print_histogram(struct list *hl){
 	printf("Distance\tNumber of node pairs\n");
-	struct histogram_entry *e = hl->head;
+	struct list_entry *e = hl->head;
 	while(e != NULL){
-		printf("%d\t\t%d\n", e->distance, e->num_vertices);
+		struct histogram_entry *he = e->data;
+		printf("%d\t\t%d\n", he->distance, he->num_vertices);
 		e = e->next;
 	}
 }
 
 static void find_distance_between_subgraph_vertices(struct subgraph *s){
-	struct histogram_list *hl = calloc(1, sizeof(struct histogram_list));
+	struct list *hist_list = calloc(1, sizeof(struct list));
 	struct subgraph_entry *e1 = s->head;
 	struct subgraph_entry *e2 = s->head->next;
 	if(e2 == NULL){
@@ -141,7 +131,7 @@ static void find_distance_between_subgraph_vertices(struct subgraph *s){
 		while(e2 != NULL){
 			struct visited_vertex_list *visited = calloc(1, sizeof(struct visited_vertex));
 			int distance = find_distance_between_vertices(s, e1->vertex, e2->vertex, 0, visited, 0);
-			store_distance_in_histogram(s, hl, distance);
+			store_distance_in_histogram(s, hist_list, distance);
 			e2 = e2->next;
 		}
 		e1 = e1->next;
@@ -149,7 +139,7 @@ static void find_distance_between_subgraph_vertices(struct subgraph *s){
 			e2 = e1->next;
 		}
 	}
-	print_histogram(hl);
+	print_histogram(hist_list);
 }
 
 void print_distance_histograms(){

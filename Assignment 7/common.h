@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "list.h"
+
 // This stores the vertex number (id) and all connected vertices.
 // The connections field will points to entries in the ALL_VERTICES array.
 // The connections array will default to CONNECTIONS_ARRAY_START_SIZE elements.
