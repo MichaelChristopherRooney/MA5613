@@ -1,6 +1,6 @@
 OBJECTS = main.o vertex_loader.o subgraph.o distance_finder.o list.o
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -g
 EXEC_NAME = prog
 
 all: main.o vertex_loader.o subgraph.o distance_finder.o list.o

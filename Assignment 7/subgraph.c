@@ -54,11 +54,12 @@ void find_subgraphs(){
 	cur->data = s;
 	subgraphs->head = cur;
 	s->id = 0;
-	find_subgraph_from_starting_vertex(s, &(ALL_VERTICES[0]));
+	find_subgraph_from_starting_vertex(s, ALL_VERTICES->head->data);
 	NUM_SUBGRAPHS++;
 	int i;
 	for(i = 1; i < NUM_VERTICES; i++){
-		if(ALL_VERTICES[i].in_subgraph == 1){
+		struct vertex_cell *c = get_vertex_by_id(i);
+		if(c->in_subgraph == 1){
 			continue;
 		}
 		cur->next = calloc(1, sizeof(struct list_entry));
@@ -67,7 +68,7 @@ void find_subgraphs(){
 		s->entries = calloc(1, sizeof(struct list_entry));
 		s->id = 1;
 		cur->data = s;
-		find_subgraph_from_starting_vertex(cur->data, &(ALL_VERTICES[i]));
+		find_subgraph_from_starting_vertex(cur->data, get_vertex_by_id(i));
 		NUM_SUBGRAPHS++;
 	}
 	printf("Number of subgraphs: %d\n", NUM_SUBGRAPHS);

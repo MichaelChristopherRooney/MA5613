@@ -1,9 +1,20 @@
 #include "common.h"
 
+struct vertex_cell * get_vertex_by_id(int id){
+	struct list_entry *e = ALL_VERTICES->head;
+	while(e != NULL){
+		struct vertex_cell *c = e->data;
+		if(c->number == id){
+			return c;
+		}
+		e = e->next;
+	}
+	return NULL;
+}
+
 void init_globals(){
-	VERTEX_ARRAY_CUR_SIZE = 0;
+	ALL_VERTICES = calloc(1, sizeof(struct list));
 	NUM_VERTICES = 0;
-	ALL_VERTICES = calloc(1, sizeof(struct vertex_cell) * VERTEX_ARRAY_START_SIZE);
 }
 
 int main(int argc, char *argv[]){

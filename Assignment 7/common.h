@@ -6,6 +6,8 @@
 
 #include "list.h"
 
+struct vertex_cell * get_vertex_by_id(int id);
+
 // This stores the vertex number (id) and all connected vertices.
 // The connections field will points to entries in the ALL_VERTICES array.
 // The connections array will default to CONNECTIONS_ARRAY_START_SIZE elements.
@@ -20,12 +22,7 @@ struct vertex_cell {
 
 #define CONNECTIONS_ARRAY_START_SIZE 32
 
-// An array of all vertices.
-// Defaults to VERTEX_ARRAY_START_SIZE number of elements.
-// If more space is needed realloc() will be used to grow the array.
-struct vertex_cell *ALL_VERTICES;
-#define VERTEX_ARRAY_START_SIZE 32
-int VERTEX_ARRAY_CUR_SIZE;
+struct list *ALL_VERTICES;
 int NUM_VERTICES;
 
 int read_vertices_from_file(char *filename);

@@ -1,30 +1,27 @@
 #include "common.h"
 
-// Checks if the element at ALL_VERTICES[number] matches the passed number,
-// and returns if so as the vertex already exists. This also checks if 
-// NUM_VERTICES > 0 otherwise inserting vertex 0 will fail as the array 
-// contains 0 initially.
+// First checks if the vertex already exists, as vertices are created when a
+// connection a new vertex is found.
 static void insert_new_vertex(int vert_num){
-	if(vert_num > VERTEX_ARRAY_CUR_SIZE){
-		// TODO: realloc
-	}
-	if(ALL_VERTICES[vert_num].number == vert_num && NUM_VERTICES > 0){ 
+	if(get_vertex_by_id(vert_num) != NULL){
 		return;
 	}
-	ALL_VERTICES[vert_num].number = vert_num;
-	ALL_VERTICES[vert_num].num_connections = 0;
-	ALL_VERTICES[vert_num].connections = calloc(1, sizeof(struct vertex_cell *) * CONNECTIONS_ARRAY_START_SIZE);
+	struct vertex_cell *c = calloc(1, sizeof(struct vertex_cell));
+	c->number = vert_num;
+	c->num_connections = 0;
+	c->connections = calloc(1, sizeof(struct vertex_cell *) * CONNECTIONS_ARRAY_START_SIZE);	
+	append_entry_to_list(ALL_VERTICES, c);
 	NUM_VERTICES++;
 }
 
 // First of all create the connection vertex if it does not exist already.
 static void insert_new_connection(int vert_num, int conn_num){
 	insert_new_vertex(conn_num);
-	struct vertex_cell *v = &(ALL_VERTICES[vert_num]);
+	struct vertex_cell *v = get_vertex_by_id(vert_num);
 	if(v->connection_array_size == v->num_connections){
 		// TODO: realloc();
 	}
-	v->connections[v->num_connections] = &(ALL_VERTICES[conn_num]);
+	v->connections[v->num_connections] = get_vertex_by_id(conn_num);
 	v->num_connections++;	
 }
 
