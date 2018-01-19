@@ -31,7 +31,7 @@ static void find_subgraph_from_starting_vertex(struct subgraph *s, struct vertex
 	e->connections_visited = 1;
 	int i;
 	for(i = 0; i < v->num_connections; i++){
-		struct vertex_cell *v_conn = v->connections[i];
+		struct vertex_cell *v_conn = get_connection_by_index(v, i);
 		struct subgraph_entry *e_conn = get_subgraph_entry_for_vertex(s, v_conn->number);
 		int conn_visited = 0;
 		if(e_conn != NULL){

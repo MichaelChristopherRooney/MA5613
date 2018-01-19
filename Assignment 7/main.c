@@ -1,6 +1,18 @@
 #include "common.h"
 
-struct vertex_cell * get_vertex_by_id(int id){
+struct vertex_cell *get_connection_by_index(struct vertex_cell *v, int i){
+	struct list_entry *e = v->connections->head;
+	int n;
+	for(n = 0; n < i; n++){
+		if(e == NULL){
+			return NULL;
+		}
+		e = e->next;
+	}
+	return e->data;
+}
+
+struct vertex_cell *get_vertex_by_id(int id){
 	struct list_entry *e = ALL_VERTICES->head;
 	while(e != NULL){
 		struct vertex_cell *c = e->data;

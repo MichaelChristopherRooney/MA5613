@@ -9,7 +9,7 @@ static void insert_new_vertex(int vert_num){
 	struct vertex_cell *c = calloc(1, sizeof(struct vertex_cell));
 	c->number = vert_num;
 	c->num_connections = 0;
-	c->connections = calloc(1, sizeof(struct vertex_cell *) * CONNECTIONS_ARRAY_START_SIZE);	
+	c->connections = calloc(1, sizeof(struct list));	
 	append_entry_to_list(ALL_VERTICES, c);
 	NUM_VERTICES++;
 }
@@ -18,10 +18,7 @@ static void insert_new_vertex(int vert_num){
 static void insert_new_connection(int vert_num, int conn_num){
 	insert_new_vertex(conn_num);
 	struct vertex_cell *v = get_vertex_by_id(vert_num);
-	if(v->connection_array_size == v->num_connections){
-		// TODO: realloc();
-	}
-	v->connections[v->num_connections] = get_vertex_by_id(conn_num);
+	append_entry_to_list(v->connections, get_vertex_by_id(conn_num));
 	v->num_connections++;	
 }
 

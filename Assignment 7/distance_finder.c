@@ -64,11 +64,11 @@ static int find_distance_between_vertices(struct subgraph *s, struct vertex_cell
 	add_visited_vertex(visited, v1);
 	int i;
 	for(i = 0; i < v1->num_connections; i++){
-		if(v1->connections[i]->number == v2->number){
+		struct vertex_cell *v_conn = get_connection_by_index(v1, i);
+		if(v_conn->number == v2->number){
 			remove_visited_vertex(visited, v1);
 			return depth + 1;
 		}
-		struct vertex_cell *v_conn = v1->connections[i];
 		if(was_vertex_already_visited(visited, v_conn) == NULL){
 			int distance = find_distance_between_vertices(s, v_conn, v2, depth + 1, visited, shortest_distance);
 			if(distance != 0){

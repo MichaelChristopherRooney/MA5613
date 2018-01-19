@@ -7,6 +7,7 @@
 #include "list.h"
 
 struct vertex_cell * get_vertex_by_id(int id);
+struct vertex_cell *get_connection_by_index(struct vertex_cell *v, int i);
 
 // This stores the vertex number (id) and all connected vertices.
 // The connections field will points to entries in the ALL_VERTICES array.
@@ -14,13 +15,12 @@ struct vertex_cell * get_vertex_by_id(int id);
 // If more space is needed realloc() will be used to grow the array.
 struct vertex_cell {
 	int number;
-	struct vertex_cell **connections;
+	struct list *connections;
+	//struct vertex_cell **connections;
 	int num_connections;
 	int connection_array_size;
 	int in_subgraph; // TODO: change to subgraph link
 };
-
-#define CONNECTIONS_ARRAY_START_SIZE 32
 
 struct list *ALL_VERTICES;
 int NUM_VERTICES;
