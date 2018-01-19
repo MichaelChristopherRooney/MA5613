@@ -4,7 +4,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "list.h"
+/////////////////////////////////////////////////////////////////////////////
+// List
+/////////////////////////////////////////////////////////////////////////////
+
+struct list_entry {
+	void *data;
+	struct list_entry *next;
+	struct list_entry *prev;
+};
+
+struct list {
+	struct list_entry *head;
+	struct list_entry *tail;
+};
+
+void append_entry_to_list(struct list *l, void *data);
+void remove_entry_from_list(struct list *l, struct list_entry *e);
+void remove_entry_from_list_by_data(struct list *l, void *data);
+
+/////////////////////////////////////////////////////////////////////////////
+// General vertex stuff
+/////////////////////////////////////////////////////////////////////////////
 
 struct vertex_cell * get_vertex_by_id(int id);
 struct vertex_cell *get_connection_by_index(struct vertex_cell *v, int i);
@@ -19,7 +40,7 @@ struct vertex_cell {
 	//struct vertex_cell **connections;
 	int num_connections;
 	int connection_array_size;
-	int in_subgraph; // TODO: change to subgraph link
+	struct subgraph *subgraph_link;
 };
 
 struct list *ALL_VERTICES;
@@ -56,4 +77,6 @@ void find_distances_for_all_subgraphs();
 /////////////////////////////////////////////////////////////////////////////
 
 void print_distance_histograms();
+
+
 

@@ -16,13 +16,12 @@ static struct subgraph_entry *insert_vertex_into_subgraph(struct subgraph *s, st
 	struct subgraph_entry *se = calloc(1, sizeof(struct subgraph_entry));
 	se->vertex = v;
 	append_entry_to_list(s->entries, se);
-	v->in_subgraph = 1;
+	v->subgraph_link = s;
 	s->num_vertices++;
 	return se;
 }
 
-// TODO: comment
-// Recursively...
+// See report for details on how this works.
 static void find_subgraph_from_starting_vertex(struct subgraph *s, struct vertex_cell *v){
 	struct subgraph_entry *e = get_subgraph_entry_for_vertex(s, v->number);
 	if(e == NULL){
@@ -59,7 +58,7 @@ void find_subgraphs(){
 	int i;
 	for(i = 1; i < NUM_VERTICES; i++){
 		struct vertex_cell *c = get_vertex_by_id(i);
-		if(c->in_subgraph == 1){
+		if(c->subgraph_link != NULL){
 			continue;
 		}
 		cur->next = calloc(1, sizeof(struct list_entry));

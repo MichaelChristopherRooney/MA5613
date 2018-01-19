@@ -5,71 +5,32 @@ struct histogram_entry {
 	int num_vertices;
 };
 
-struct visited_vertex {
-	struct vertex_cell *vertex;
-	struct visited_vertex *prev;
-	struct visited_vertex *next;
-};
-
-struct visited_vertex_list {
-	struct visited_vertex *head;
-	struct visited_vertex *tail;
-};
-
-// TODO: rename
-static struct visited_vertex *was_vertex_already_visited(struct visited_vertex_list *visited, struct vertex_cell *v){
-	struct visited_vertex *cur = visited->head;
+static struct vertex_cell *find_vertex_in_list(struct list *visited, struct vertex_cell *v){
+	struct list_entry *cur = visited->head;
 	while(cur != NULL){
-		if(cur->vertex->number == v->number){
-			return cur;
+		struct vertex_cell *c = cur->data;
+		if(c->number == v->number){
+			return c;
 		}
 		cur = cur->next;
 	}
 	return NULL;
 }
 
-static void add_visited_vertex(struct visited_vertex_list *vl, struct vertex_cell *v){
-	if(vl->head == NULL){
-		vl->head = calloc(1, sizeof(struct visited_vertex));
-		vl->tail = vl->head;
-		vl->head->vertex = v;
-	} else {
-		vl->tail->next = calloc(1, sizeof(struct visited_vertex));
-		vl->tail->next->prev = vl->tail;
-		vl->tail = vl->tail->next;
-		vl->tail->vertex = v;
-	}
-}
-
-static void remove_visited_vertex(struct visited_vertex_list *vl, struct vertex_cell *v){
-	struct visited_vertex *cur = was_vertex_already_visited(vl, v);
-	if(cur == vl->head){
-		vl->head = NULL;
-		vl->tail = NULL;
-	} else if(cur == vl->tail){
-		vl->tail = cur->prev;
-		vl->tail->next = NULL;
-	} else {
-		cur->prev->next = cur->next;
-		cur->next->prev = cur->prev;
-	}
-	free(cur);
-}
-
-// First of all checks if the vertices are adjacent.
-// If not it then...
-// TODO: comment
-// TODO: cleanup
-static int find_distance_between_vertices(struct subgraph *s, struct vertex_cell *v1, struct vertex_cell *v2, int depth, struct visited_vertex_list *visited, int shortest_distance){
-	add_visited_vertex(visited, v1);
+// This function is recursive.
+// It finds the shortest path from v1 to v2 by following v1's connections.
+// Shortest distance will be set to zero on the first call.
+// A list of visited vertices is kept to avoid infinite loops and redundant checking.
+static int find_distance_between_vertices(struct subgraph *s, struct vertex_cell *v1, struct vertex_cell *v2, int depth, struct list *visited, int shortest_distance){
+	append_entry_to_list(visited, v1);
 	int i;
 	for(i = 0; i < v1->num_connections; i++){
 		struct vertex_cell *v_conn = get_connection_by_index(v1, i);
 		if(v_conn->number == v2->number){
-			remove_visited_vertex(visited, v1);
+			remove_entry_from_list_by_data(visited, v1);
 			return depth + 1;
 		}
-		if(was_vertex_already_visited(visited, v_conn) == NULL){
+		if(find_vertex_in_list(visited, v_conn) == NULL){
 			int distance = find_distance_between_vertices(s, v_conn, v2, depth + 1, visited, shortest_distance);
 			if(distance != 0){
 				if(distance < shortest_distance || shortest_distance == 0){
@@ -78,7 +39,7 @@ static int find_distance_between_vertices(struct subgraph *s, struct vertex_cell
 			}
 		}
 	}
-	remove_visited_vertex(visited, v1);
+	remove_entry_from_list_by_data(visited, v1);
 	return shortest_distance;
 }
 
@@ -131,7 +92,7 @@ static void find_distance_between_subgraph_vertices(struct subgraph *s){
 		while(l2 != NULL){
 			struct subgraph_entry *e1 = l1->data;
 			struct subgraph_entry *e2 = l2->data;
-			struct visited_vertex_list *visited = calloc(1, sizeof(struct visited_vertex));
+			struct list *visited = calloc(1, sizeof(struct list));
 			int distance = find_distance_between_vertices(s, e1->vertex, e2->vertex, 0, visited, 0);
 			store_distance_in_histogram(s, hist_list, distance);
 			l2 = l2->next;

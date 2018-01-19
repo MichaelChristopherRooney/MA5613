@@ -1,6 +1,4 @@
-#include <stdlib.h>
-
-#include "list.h"
+#include "common.h"
 
 void append_entry_to_list(struct list *l, void *data){
 	struct list_entry *e = calloc(1, sizeof(struct list_entry));
@@ -30,4 +28,13 @@ void remove_entry_from_list(struct list *l, struct list_entry *e){
 		e->next->prev = e->prev;
 	}
 	free(e);
+}
+
+// Looks for an entry that has the same data pointer and removes it.
+void remove_entry_from_list_by_data(struct list *l, void *data){
+	struct list_entry *e = l->head;
+	while(e->data != data){
+		e = e->next;
+	}
+	remove_entry_from_list(l, e);
 }

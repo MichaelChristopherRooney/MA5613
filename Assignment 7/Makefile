@@ -18,7 +18,7 @@ subgraph.o: subgraph.c common.h
 distance_finder.o: distance_finder.c common.h
 	$(CC) -c distance_finder.c $(CFLAGS)
 
-list.o: list.c list.h
+list.o: list.c common.h
 	$(CC) -c list.c $(CFLAGS)
 
 clean:
